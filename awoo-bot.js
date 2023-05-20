@@ -7,7 +7,7 @@ client.on('ready', () => {
 
 client.on('message', (message) => {
   if (message.content === '/awoo') {
-    const attachment = new Discord.MessageAttachment('path_to_wolf_image.png');
+    const attachment = new Discord.MessageAttachment('https://mugi.me/discord/bots/img/awoo.png');
     message.channel.send(attachment);
   }
 });
