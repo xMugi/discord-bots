@@ -1,1 +1,3 @@
 npm install discordjs
+node init -y
+node awoo-bot.js
