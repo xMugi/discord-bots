@@ -1,3 +1,5 @@
+// made by https://twitter.com/xkawaimugi
+
 const { Client, Intents, GatewayIntentBits } = require('discord.js');
 const fs = require('fs');
 const { REST } = require('@discordjs/rest');
