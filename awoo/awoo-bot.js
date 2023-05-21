@@ -1,21 +1,44 @@
-// made by https://twitter.com/xkawaimugi via chatgpt c:
-
-const { Client, Intents, GatewayIntentBits } = require('discord.js');
+const { Client, Intents, GatewayIntentBits, ActivityType, Guild } = require('discord.js');
 const fs = require('fs');
 const { REST } = require('@discordjs/rest');
 const { Routes } = require('discord-api-types/v9');
 
 // Load configuration from config.json
 const config = require('./config.json');
-const { clientId, guildIds, token } = config;
+const { clientId, guildIds, token, userId } = config;
 
 const client = new Client({
-  intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages]
+  intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages],
 });
+
+async function setBotStatus(client, guildIds) {
+  try {
+    for (const guildId of guildIds) {
+      const guild = await client.guilds.fetch(guildId);
+      const user = guild.members.resolve(client.user.id);
+
+      await client.user.setPresence({
+        activities: [
+          {
+            name: 'awooing! | /awoo',
+            type: ActivityType.Playing
+          }
+        ],
+        status: 'online'
+      });
+
+      console.log(`Bot status set successfully for guild: ${guildId}`);
+    }
+  } catch (error) {
+    console.error('Failed to set bot status:', error);
+  }
+}
 
 client.once('ready', () => {
   console.log(`Logged in as ${client.user.tag}!`);
-  client.user.setActivity('/help', { type: 'LISTENING' });
+
+  // Set the initial bot status
+  setBotStatus(client, guildIds);
 });
 
 const rest = new REST({ version: '9' }).setToken(token);
@@ -25,7 +48,7 @@ const rest = new REST({ version: '9' }).setToken(token);
     console.log('Started refreshing application (/) commands.');
 
     const commands = [];
-    const commandFiles = fs.readdirSync('./commands').filter(file => file.endsWith('.js'));
+    const commandFiles = fs.readdirSync('./commands').filter((file) => file.endsWith('.js'));
 
     for (const file of commandFiles) {
       const command = require(`./commands/${file}`);
@@ -33,10 +56,7 @@ const rest = new REST({ version: '9' }).setToken(token);
     }
 
     for (const guildId of guildIds) {
-      await rest.put(
-        Routes.applicationGuildCommands(clientId, guildId),
-        { body: commands }
-      );
+      await rest.put(Routes.applicationGuildCommands(clientId, guildId), { body: commands });
       console.log(`Registered slash commands for guild: ${guildId}`);
     }
 
@@ -47,7 +67,7 @@ const rest = new REST({ version: '9' }).setToken(token);
 })();
 
 client.commands = new Map();
-const commandFiles = fs.readdirSync('./commands').filter(file => file.endsWith('.js'));
+const commandFiles = fs.readdirSync('./commands').filter((file) => file.endsWith('.js'));
 for (const file of commandFiles) {
   const command = require(`./commands/${file}`);
   client.commands.set(command.data.name, command);
@@ -57,7 +77,6 @@ client.on('interactionCreate', async (interaction) => {
   if (!interaction.isCommand()) return;
 
   const { commandName } = interaction;
-
   const command = client.commands.get(commandName);
 
   if (!command) return;
