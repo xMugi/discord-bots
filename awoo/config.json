@@ -1,5 +1,6 @@
 {
-	"clientId": "client_id_bot",
-	"guildIds": ["first_guild", "second_guild"],
-	"token": "bot_token"
+	"token": "bottoken",
+	"clientId": "botid",
+ 	"guildIds": ["guildid", "guildid2"],
+	"userId": "userid"
 }
