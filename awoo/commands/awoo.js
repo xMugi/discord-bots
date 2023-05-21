@@ -1,3 +1,5 @@
+// made by https://twitter.com/xkawaimugi
+
 const { SlashCommandBuilder } = require('discord.js');
 const fs = require('fs');
 const path = require('path');
