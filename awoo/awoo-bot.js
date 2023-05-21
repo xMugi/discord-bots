@@ -1,4 +1,4 @@
-// made by https://twitter.com/xkawaimugi
+// made by https://twitter.com/xkawaimugi via chatgpt c:
 
 const { Client, Intents, GatewayIntentBits } = require('discord.js');
 const fs = require('fs');
