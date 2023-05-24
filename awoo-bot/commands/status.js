@@ -1,5 +1,5 @@
 const { SlashCommandBuilder, ChannelTypes, ActivityType } = require('discord.js');
-const { userId } = require('../config.json');
+const { userId } = require('../config/config.json');
 
 module.exports = {
   data: new SlashCommandBuilder()
