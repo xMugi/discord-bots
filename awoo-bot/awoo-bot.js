@@ -4,7 +4,7 @@ const { REST } = require('@discordjs/rest');
 const { Routes } = require('discord-api-types/v9');
 
 // Load configuration from config.json
-const config = require('./config.json');
+const config = require('./config/config.json');
 const { clientId, guildIds, token, userId } = config;
 
 const client = new Client({
