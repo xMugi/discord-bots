@@ -1,5 +1,7 @@
 made by me via chatgpt
 
+d-bot perm integer : 414464658496
+
 npm install discordjs
 node init -y
 node awoo-bot.js
