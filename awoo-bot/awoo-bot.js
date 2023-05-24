@@ -3,7 +3,7 @@ const fs = require('fs');
 const { REST } = require('@discordjs/rest');
 const { Routes } = require('discord-api-types/v9');
 
-// Load configuration from config.json
+//@xkawaimugi Load configuration from config.json
 const config = require('./config/config.json');
 const { clientId, guildIds, token, userId } = config;
 
@@ -69,6 +69,7 @@ const rest = new REST({ version: '9' }).setToken(token);
 client.commands = new Map();
 const commandFiles = fs.readdirSync('./commands').filter((file) => file.endsWith('.js'));
 for (const file of commandFiles) {
+  //commands @xkawaimugi
   const command = require(`./commands/${file}`);
   client.commands.set(command.data.name, command);
 }
