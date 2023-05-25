@@ -20,7 +20,7 @@ async function setBotStatus(client, guildIds) {
       await client.user.setPresence({
         activities: [
           {
-            name: 'awooing! | /awoo',
+            name: 'mugi.me | /awoo',
             type: ActivityType.Playing
           }
         ],
