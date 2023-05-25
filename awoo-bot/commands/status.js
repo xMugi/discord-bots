@@ -18,7 +18,7 @@ module.exports = {
     }
 
     const statusMessage = interaction.options.getString('status');
-    const statusMessages = 'mugi.me';
+    const statusMessages = 'mugi.pages.dev';
 
     try {
       await interaction.client.user.setPresence({
