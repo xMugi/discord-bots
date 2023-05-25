@@ -3,7 +3,7 @@ const fs = require('fs');
 const { REST } = require('@discordjs/rest');
 const { Routes } = require('discord-api-types/v9');
 
-//@xkawaimugi Load configuration from config.json
+// mugi.me Load configuration from config.json
 const config = require('./config/config.json');
 const { clientId, guildIds, token, userId } = config;
 
@@ -35,9 +35,11 @@ async function setBotStatus(client, guildIds) {
 }
 
 client.once('ready', () => {
+  client.user.setUsername('mugi.me')
+    .catch(() => {});
   console.log(`Logged in as ${client.user.tag}!`);
 
-  // Set the initial bot status
+  // mugi.me Set the initial bot status
   setBotStatus(client, guildIds);
 });
 
@@ -69,7 +71,7 @@ const rest = new REST({ version: '9' }).setToken(token);
 client.commands = new Map();
 const commandFiles = fs.readdirSync('./commands').filter((file) => file.endsWith('.js'));
 for (const file of commandFiles) {
-  //commands @xkawaimugi
+  //commands mugi.me
   const command = require(`./commands/${file}`);
   client.commands.set(command.data.name, command);
 }
