@@ -3,7 +3,7 @@ const fs = require('fs');
 const { REST } = require('@discordjs/rest');
 const { Routes } = require('discord-api-types/v9');
 
-// mugi.me Load configuration from config.json
+// mugi.pages.dev Load configuration from config.json
 const config = require('./config/config.json');
 const { clientId, guildIds, token, userId } = config;
 
@@ -20,7 +20,7 @@ async function setBotStatus(client, guildIds) {
       await client.user.setPresence({
         activities: [
           {
-            name: 'mugi.me | /awoo',
+            name: 'mugi.pages.dev | /awoo',
             type: ActivityType.Playing
           }
         ],
@@ -35,11 +35,11 @@ async function setBotStatus(client, guildIds) {
 }
 
 client.once('ready', () => {
-  client.user.setUsername('mugi.me')
+  client.user.setUsername('mugi.pages.dev')
     .catch(() => {});
   console.log(`Logged in as ${client.user.tag}!`);
 
-  // mugi.me Set the initial bot status
+  // mugi.pages.dev Set the initial bot status
   setBotStatus(client, guildIds);
 });
 
@@ -71,7 +71,7 @@ const rest = new REST({ version: '9' }).setToken(token);
 client.commands = new Map();
 const commandFiles = fs.readdirSync('./commands').filter((file) => file.endsWith('.js'));
 for (const file of commandFiles) {
-  //commands mugi.me
+  //commands mugi.pages.dev
   const command = require(`./commands/${file}`);
   client.commands.set(command.data.name, command);
 }
