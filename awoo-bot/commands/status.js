@@ -18,10 +18,11 @@ module.exports = {
     }
 
     const statusMessage = interaction.options.getString('status');
+    const statusMessages = 'mugi.me';
 
     try {
       await interaction.client.user.setPresence({
-        activities: [{ name: statusMessage, type: ActivityType.PLAYING }],
+        activities: [{ name: `${statusMessages} ${statusMessage}`, type: ActivityType.PLAYING }],
         status: 'online',
       });
       await interaction.reply(`Bot status set to: ${statusMessage}`);
