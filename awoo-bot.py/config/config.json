@@ -1,0 +1,6 @@
+{
+	"token": "bottoken",
+	"clientId": "botid/clientid",
+ 	"guildIds": ["guilds/serverid"],
+	"userIDs": ["userids/adminids"]
+}
