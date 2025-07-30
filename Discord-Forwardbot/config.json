@@ -6,5 +6,7 @@
     2,
     3,
     4
-  ]
+  ],
+  "bot_display_name": "name",
+  "bot_avatar_url": "avatar_url"
 }
