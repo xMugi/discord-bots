@@ -1,0 +1,10 @@
+{
+  "user_token": "token",
+  "destination_webhook_url": "webhook",
+  "source_channel_ids": [
+    1,
+    2,
+    3,
+    4
+  ]
+}
