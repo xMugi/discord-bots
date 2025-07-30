@@ -3,6 +3,15 @@ import asyncio
 import json
 import os
 from collections import deque
+import logging
+
+# --- LOGGING-KONFIGURATION ---
+logging.basicConfig(
+    filename='bot.log',
+    level=logging.INFO,
+    format='%(asctime)s | %(levelname)s | %(message)s',
+    datefmt='%Y-%m-%d %H:%M:%S'
+)
 
 # --- KONFIGURATION LADEN ---
 try:
@@ -12,23 +21,20 @@ try:
     USER_TOKEN = config.get("user_token")
     WEBHOOK_URL = config.get("destination_webhook_url")
     SOURCE_CHANNEL_IDS = config.get("source_channel_ids", [])
+    BOT_DISPLAY_NAME = config.get("bot_display_name", "Webhook-Bot")
+    BOT_AVATAR_URL = config.get("bot_avatar_url")
+    
 except FileNotFoundError:
-    print("Fehler: Die Datei 'config.json' wurde nicht gefunden. Bitte erstelle sie.")
+    logging.error("Fehler: Die Datei 'config.json' wurde nicht gefunden. Bitte erstelle sie.")
     exit()
 except json.JSONDecodeError:
-    print("Fehler: Die Datei 'config.json' ist fehlerhaft formatiert.")
+    logging.error("Fehler: Die Datei 'config.json' ist fehlerhaft formatiert.")
     exit()
 
 # --- EINSTELLUNGEN ---
-# Wie viele Nachrichten pro Kanal im Nachhol-Modus abgerufen werden sollen.
-CATCH_UP_MESSAGE_LIMIT = 8
-
-# Wie viele Nachrichten-IDs maximal in der Log-Datei gespeichert werden sollen.
-# Sollte größer oder gleich CATCH_UP_MESSAGE_LIMIT * Anzahl_Kanäle sein.
-LOG_ID_LIMIT = CATCH_UP_MESSAGE_LIMIT * len(SOURCE_CHANNEL_IDS)
-
-# Wie viele Sekunden zwischen dem Senden jeder Nachricht gewartet werden soll
-MESSAGE_DELAY_SECONDS = 3
+CATCH_UP_MESSAGE_LIMIT = 5
+LOG_ID_LIMIT = CATCH_UP_MESSAGE_LIMIT * len(SOURCE_CHANNEL_IDS) + 30
+MESSAGE_DELAY_SECONDS = 2
 
 # --- LOG-DATEI LADEN UND BEGRENZEN ---
 SENT_MESSAGES_LOG = 'sent_messages.log'
@@ -45,64 +51,62 @@ client = discord.Client()
 async def send_webhook_message(message: discord.Message):
     """Eine Hilfsfunktion, um den Webhook zu senden."""
     if message.guild:
-        source_channel_info = f"#{message.channel.name} ({message.guild.name})"
-        webhook_username_info = f"in #{message.channel.name}"
+        source_channel_info = f"in #{message.channel.name}"
     else:
-        source_channel_info = "Direktnachricht"
-        webhook_username_info = "in einer Direktnachricht"
+        source_channel_info = "in einer Direktnachricht"
 
     safe_content = message.content.replace('@everyone', '@ everyone').replace('@here', '@ here')
 
-    print(f'Sende Nachricht von {message.author.name} in {source_channel_info} weiter...')
+    logging.info(f'Sende Nachricht von {BOT_DISPLAY_NAME} | {source_channel_info} weiter...')
     
     try:
         webhook = discord.Webhook.from_url(WEBHOOK_URL, client=client)
         await webhook.send(
-            content=safe_content,
-            username=f"{message.author.name} | {webhook_username_info}",
-            avatar_url=message.author.avatar.url if message.author.avatar else None,
+            content=f"{safe_content}\n\n",
+            username=f"{BOT_DISPLAY_NAME} | {source_channel_info}",
+            avatar_url=BOT_AVATAR_URL,
             embeds=message.embeds,
             files=[await f.to_file() for f in message.attachments]
         )
-        print("Nachricht erfolgreich weitergeleitet.")
+        logging.info("Nachricht erfolgreich weitergeleitet.")
 
         sent_message_ids.append(message.id)
         with open(SENT_MESSAGES_LOG, 'w', encoding='utf-8') as f:
             for msg_id in sent_message_ids:
                 f.write(str(msg_id) + '\n')
     except Exception as e:
-        print(f"Fehler beim Senden des Webhooks: {e}")
+        logging.error(f"Fehler beim Senden des Webhooks: {e}")
 
 async def catch_up():
     """Holt die letzten Nachrichten aus den Kanälen nach, die noch nicht gesendet wurden."""
-    print("Starte den Nachhol-Modus...")
+    logging.info("Starte den Nachhol-Modus...")
     missed_messages = []
     
     for channel_id in SOURCE_CHANNEL_IDS:
         try:
             channel = await client.fetch_channel(channel_id)
-            print(f'Überprüfe Kanal {channel.name} auf verpasste Nachrichten...')
+            logging.info(f'Überprüfe Kanal {channel.name} auf verpasste Nachrichten...')
             async for message in channel.history(limit=CATCH_UP_MESSAGE_LIMIT):
                 if message.id not in sent_message_ids and message.author != client.user:
                     missed_messages.append(message)
         except Exception as e:
-            print(f"Fehler beim Nachholen von Nachrichten im Kanal {channel_id}: {e}")
+            logging.error(f"Fehler beim Nachholen von Nachrichten im Kanal {channel_id}: {e}")
             
     missed_messages.sort(key=lambda msg: msg.id)
-    print(f'Gefundene {len(missed_messages)} verpasste Nachrichten zum Nachholen.')
+    logging.info(f'Gefundene {len(missed_messages)} verpasste Nachrichten zum Nachholen.')
 
     for message in missed_messages:
         await send_webhook_message(message)
         await asyncio.sleep(MESSAGE_DELAY_SECONDS)
         
-    print("Nachhol-Modus abgeschlossen.")
+    logging.info("Nachhol-Modus abgeschlossen.")
 
 @client.event
 async def on_ready():
-    print(f'Erfolgreich eingeloggt als: {client.user}')
-    print(f'Überwache {len(SOURCE_CHANNEL_IDS)} Kanäle.')
-    print(f'Geladene IDs aus dem Log: {len(sent_message_ids)}')
-    print(f'Leite Nachrichten an den konfigurierten Webhook weiter.')
+    logging.info(f'Erfolgreich eingeloggt als: {client.user}')
+    logging.info(f'Überwache {len(SOURCE_CHANNEL_IDS)} Kanäle.')
+    logging.info(f'Geladene IDs aus dem Log: {len(sent_message_ids)}')
+    logging.info(f'Leite Nachrichten an den konfigurierten Webhook weiter.')
 
     await catch_up()
 
@@ -117,7 +121,7 @@ async def on_message(message: discord.Message):
 
 async def main():
     if not all([USER_TOKEN, WEBHOOK_URL, SOURCE_CHANNEL_IDS]):
-        print("Fehler: Bitte stelle sicher, dass 'config.json' die Werte für 'user_token', 'destination_webhook_url' und 'source_channel_ids' enthält.")
+        logging.error("Fehler: Bitte stelle sicher, dass 'config.json' die Werte für 'user_token', 'destination_webhook_url' und 'source_channel_ids' enthält.")
         return
     await client.start(USER_TOKEN)
 
@@ -125,4 +129,4 @@ if __name__ == "__main__":
     try:
         asyncio.run(main())
     except KeyboardInterrupt:
-        print("Bot wird beendet.")
+        logging.info("Bot wird beendet.")
