@@ -1,0 +1,13 @@
+#!/data/data/com.termux/files/usr/bin/sh
+
+# Navigiert in das Skript-Verzeichnis
+cd /data/data/com.termux/files/home/python-stuff/discord-forwardbot/realmsofpixel
+
+# Überprüft, ob der Bot bereits läuft, indem nach dem Skriptnamen gesucht wird
+if pgrep -f "python3 forward-botv2.py" > /dev/null
+then
+    echo "Bot läuft bereits. Starte keine neue Instanz." >> bot.log
+else
+    echo "Bot läuft nicht. Starte eine neue Instanz." >> bot.log
+    nohup python3 forward-botv2.py > bot.log 2> nohup.log & echo $! > PID.log
+fi
